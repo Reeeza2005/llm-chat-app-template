@@ -13,7 +13,7 @@ export default {
 
         const lastUserMessage = messages[messages.length - 1]?.content || "";
 
-        // ۱. ساخت عکس
+        // ۱. ساخت عکس با Stable Diffusion XL
         if (
           lastUserMessage.toLowerCase().startsWith("image:") ||
           lastUserMessage.includes("عکس بساز")
@@ -42,22 +42,23 @@ export default {
           );
         }
 
-        // افزودن هویت واقعی مدل به ابتدای آرایه پیام‌ها
+        // افزودن هویت و دستورالعمل دقت بالا به پیام سیستم
         const formattedMessages = [
           {
             role: "system",
             content:
-              "You are Llama 3.2, a large language model created by Meta, hosted on Cloudflare Workers AI.",
+              "You are a highly accurate AI assistant powered by Meta Llama 3.3 70B, hosted on Cloudflare Workers AI. Answer accurately and fluently in Persian or English based on the user's language.",
           },
           ...messages,
         ];
 
-        // ۲. چت متنی با مدل Llama 3.2
+        // ۲. چت متنی با مدل ۷۰ میلیارد پارامتری Llama 3.3
         const stream = await env.AI.run(
-          "@cf/meta/llama-3.2-3b-instruct",
+          "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
           {
             messages: formattedMessages,
             stream: true,
+            temperature: 0.3, // دما پایین برای کاهش توهم و افزایش دقت
           }
         );
 
