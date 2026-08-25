@@ -42,11 +42,21 @@ export default {
           );
         }
 
-        // ۲. چت متنی با مدل اکتیو Llama 3.2
+        // افزودن هویت واقعی مدل به ابتدای آرایه پیام‌ها
+        const formattedMessages = [
+          {
+            role: "system",
+            content:
+              "You are Llama 3.2, a large language model created by Meta, hosted on Cloudflare Workers AI.",
+          },
+          ...messages,
+        ];
+
+        // ۲. چت متنی با مدل Llama 3.2
         const stream = await env.AI.run(
           "@cf/meta/llama-3.2-3b-instruct",
           {
-            messages: messages,
+            messages: formattedMessages,
             stream: true,
           }
         );
