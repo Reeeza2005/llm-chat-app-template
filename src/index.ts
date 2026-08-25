@@ -42,9 +42,9 @@ export default {
           );
         }
 
-        // ۲. چت متنی با مدل اکتیو Llama 3.1
+        // ۲. چت متنی با مدل اکتیو Llama 3.2
         const stream = await env.AI.run(
-          "@cf/meta/llama-3.1-8b-instruct",
+          "@cf/meta/llama-3.2-3b-instruct",
           {
             messages: messages,
             stream: true,
