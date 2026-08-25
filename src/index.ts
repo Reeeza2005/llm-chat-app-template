@@ -11,7 +11,6 @@ export default {
       try {
         const { messages } = (await request.json()) as { messages: any[] };
 
-        // پاک‌سازی سیستم پرامپت‌های اضافه و دریافت آخرین پیام
         const lastUserMessage = messages[messages.length - 1]?.content || "";
 
         // ۱. ساخت عکس
@@ -43,7 +42,7 @@ export default {
           );
         }
 
-        // ۲. چت متنی با مدل Llama 3.1
+        // ۲. چت متنی با مدل اکتیو Llama 3.1
         const stream = await env.AI.run(
           "@cf/meta/llama-3.1-8b-instruct",
           {
@@ -68,7 +67,7 @@ export default {
       }
     }
 
-    // بارگذاری فایل‌های ظاهر سایت
+    // بارگذاری فایل‌های ظاهری سایت
     return env.ASSETS.fetch(request);
   },
 };
