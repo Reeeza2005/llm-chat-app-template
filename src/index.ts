@@ -1,5 +1,6 @@
 export interface Env {
   AI: any;
+  ASSETS: { fetch: (request: Request) => Promise<Response> };
 }
 
 export default {
@@ -14,7 +15,7 @@ export default {
         // دریافت آخرین پیام کاربر
         const lastUserMessage = messages[messages.length - 1]?.content || "";
 
-        // اگر کاربر درخواست عکس داده باشد (مثلاً با نوشتن image: یا عبارت "عکس بساز")
+        // اگر کاربر درخواست عکس داده باشد
         if (
           lastUserMessage.toLowerCase().startsWith("image:") ||
           lastUserMessage.includes("عکس بساز")
@@ -24,21 +25,24 @@ export default {
             .replace("عکس بساز", "")
             .trim();
 
-          // تولید عکس با مدل Stable Diffusion XL
-          const imageBuffer = await env.AI.run(
+          // تولید عکس با Stable Diffusion XL
+          const imageBytes = await env.AI.run(
             "@cf/stabilityai/stable-diffusion-xl-base-1.0",
-            { prompt: prompt || "A beautiful view" }
+            { prompt: prompt || "A beautiful landscape" }
           );
 
-          // تبدیل عکس به فرمت قابل نمایش در چت
-          const base64Image = Buffer.from(imageBuffer).toString("base64");
+          // تبدیل مستقیم به Base64
+          let binary = "";
+          const bytes = new Uint8Array(imageBytes);
+          for (let i = 0; i < bytes.byteLength; i++) {
+            binary += String.fromCharCode(bytes[i]);
+          }
+          const base64Image = btoa(binary);
           const imageMarkdown = `![Generated Image](data:image/png;base64,${base64Image})`;
 
           return new Response(
             `data: ${JSON.stringify({ response: imageMarkdown })}\n\ndata: [DONE]\n\n`,
-            {
-              headers: { "Content-Type": "text/event-stream" },
-            }
+            { headers: { "Content-Type": "text/event-stream" } }
           );
         }
 
@@ -49,7 +53,10 @@ export default {
         });
 
         return new Response(stream, {
-          headers: { "content-type": "text/event-stream" },
+          headers: {
+            "content-type": "text/event-stream; charset=utf-8",
+            "cache-control": "no-cache",
+          },
         });
       } catch (error: any) {
         return new Response(JSON.stringify({ error: error.message }), {
@@ -59,6 +66,7 @@ export default {
       }
     }
 
-    return new Response("Not Found", { status: 404 });
+    // ۳. بارگذاری فایل‌های ظاهری و رابط کاربری (ضروری برای جلوگیری از خطا)
+    return env.ASSETS.fetch(request);
   },
 };
